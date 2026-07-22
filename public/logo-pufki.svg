@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 180" role="img" aria-labelledby="title">
+  <title id="title">Pufkuj</title>
+  <g fill="none" stroke="#FFF9F0" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke-width="12" d="M82 142C34 112 24 74 44 49c19-24 53-18 66 8 13-26 47-32 66-8 20 25 10 63-38 93l-28 20z"/>
+    <path stroke-width="7" d="M56 72c22 12 50 13 76 2M50 98c26 13 62 11 91-5M79 48c-5 33 7 66 31 91"/>
+  </g>
+  <text x="205" y="123" fill="#FFF9F0" font-family="Trebuchet MS, Arial Rounded MT Bold, Arial, sans-serif" font-size="106" font-weight="700" letter-spacing="-5">Pufkuj</text>
+</svg>

@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://nubeljtvlhfxxsmqiqhf.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "pufki-mcp",
+      "version": "0.2.0",
+      "title": "Pufkuj Handmade MCP"
+    },
+    "tools": [
+      {
+        "name": "list_products",
+        "title": "List Pufkuj products",
+        "description": "Return the current Pufkuj handmade product catalog (name, short description, price, purchase link). Falls back to demo data when the 1koszyk API is not configured.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "Maximum number of products to return."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_orders",
+        "title": "Moje zamówienia",
+        "description": "Zwraca listę zamówień zalogowanego użytkownika (status, kwota, pozycje). Wymaga zalogowania.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Liczba zamówień do zwrócenia (domyślnie 20)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

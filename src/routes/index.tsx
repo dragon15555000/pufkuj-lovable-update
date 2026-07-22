@@ -1,0 +1,37 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { Storefront } from "@/components/storefront";
+import { getProducts } from "@/lib/onecart.functions";
+import { getTiktokStories } from "@/lib/tiktok.functions";
+
+const catalogQuery = queryOptions({
+  queryKey: ["catalog"],
+  queryFn: () => getProducts(),
+});
+
+const tiktokQuery = queryOptions({
+  queryKey: ["tiktok-stories"],
+  queryFn: () => getTiktokStories(),
+  staleTime: 1000 * 60 * 30,
+});
+
+export const Route = createFileRoute("/")({
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(catalogQuery),
+      context.queryClient.ensureQueryData(tiktokQuery),
+    ]),
+  component: Home,
+});
+
+function Home() {
+  const { data } = useSuspenseQuery(catalogQuery);
+  const { data: tiktokStories } = useSuspenseQuery(tiktokQuery);
+  return (
+    <Storefront
+      products={data.products}
+      demo={data.demo}
+      tiktokStories={tiktokStories}
+    />
+  );
+}

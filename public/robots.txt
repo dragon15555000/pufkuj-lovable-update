@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pufki-shop-magic.lovable.app/sitemap.xml
