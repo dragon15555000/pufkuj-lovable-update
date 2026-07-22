@@ -187,8 +187,31 @@ export const confirmCheckout = createServerFn({ method: "POST" })
         .eq("id", order.id);
     }
 
-    // Send confirmation + admin notification on first transition to "paid"
+    // Decrement stock + Send confirmation + admin notification on first transition to "paid"
     if (nextStatus === "paid" && !wasPaidBefore) {
+      try {
+        const itemsToUpdate = Array.isArray(order.items) ? (order.items as Array<any>) : [];
+        for (const item of itemsToUpdate) {
+          if (!item.seller_id) continue;
+          const { data: prod } = await supabaseAdmin
+            .from("products")
+            .select("quantity_limit")
+            .eq("slug", item.seller_id)
+            .single();
+            
+          if (prod && typeof prod.quantity_limit === "number") {
+            const newLimit = Math.max(0, prod.quantity_limit - (item.quantity || 1));
+            // Disable product if stock reaches 0
+            const updates: any = { quantity_limit: newLimit };
+            if (newLimit === 0) updates.is_active = false;
+            
+            await supabaseAdmin.from("products").update(updates).eq("slug", item.seller_id);
+          }
+        }
+      } catch (err) {
+        console.error("[stock] failed to deduct stock", err);
+      }
+
       try {
         const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
         const items = Array.isArray(order.items) ? order.items : [];
