@@ -60,7 +60,7 @@ function AdminProductsPage() {
     onError: (e: any) => toast.error(e?.message ?? "Błąd usuwania"),
   });
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>, fieldName: "image_path" | "image_path_hover") {
     const file = e.target.files?.[0];
     if (!file) return;
     
@@ -78,7 +78,7 @@ function AdminProductsPage() {
     if (uploadError) {
       toast.error("Błąd wgrywania zdjęcia: " + uploadError.message);
     } else {
-      setEditingProduct({ ...editingProduct, image_path: filePath });
+      setEditingProduct({ ...editingProduct, [fieldName]: filePath });
       toast.success("Wgrano zdjęcie");
     }
   }
@@ -121,6 +121,7 @@ function AdminProductsPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap", marginBottom: 20 }}>
           <h1 style={{ margin: 0 }}>Panel Produktów</h1>
           <div style={{ display: "flex", gap: 8 }}>
+            <Link to="/admin" style={btnGhost as any}>Dashboard</Link>
             <Link to="/admin/orders" style={btnGhost as any}>Zamówienia</Link>
             <button type="button" onClick={() => { setEditingProduct({ is_active: true, sort_order: 0 }); setIsFormOpen(true); }} style={btnPrimary}>+ Dodaj produkt</button>
           </div>
@@ -157,9 +158,14 @@ function AdminProductsPage() {
                 <input type="number" min="0" style={inputStyle} value={editingProduct.quantity_limit || ""} onChange={e => setEditingProduct({...editingProduct, quantity_limit: e.target.value ? parseInt(e.target.value) : null})} />
               </div>
               <div>
-                <label style={labelStyle}>Zdjęcie (Wgraj)</label>
-                <input type="file" accept="image/*" style={inputStyle} onChange={handleImageUpload} disabled={uploading} />
+                <label style={labelStyle}>Zdjęcie główne</label>
+                <input type="file" accept="image/*" style={inputStyle} onChange={(e) => handleImageUpload(e, "image_path")} disabled={uploading} />
                 {editingProduct.image_path && <p style={{ fontSize: 12, marginTop: 4 }}>Obecne: {editingProduct.image_path}</p>}
+              </div>
+              <div>
+                <label style={labelStyle}>Zdjęcie (Hover/2w1)</label>
+                <input type="file" accept="image/*" style={inputStyle} onChange={(e) => handleImageUpload(e, "image_path_hover")} disabled={uploading} />
+                {editingProduct.image_path_hover && <p style={{ fontSize: 12, marginTop: 4 }}>Obecne: {editingProduct.image_path_hover}</p>}
               </div>
               <div style={{ gridColumn: "1 / -1" }}>
                 <label style={labelStyle}>Opis szczegółowy (Markdown)</label>

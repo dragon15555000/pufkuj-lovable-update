@@ -41,6 +41,7 @@ export type Product = {
   price_formatted: string;
   price_currency: string;
   quantity_limit?: number | null;
+  image_hover?: string | null;
 };
 
 const FALLBACK_LABEL = "Cena na zapytanie";
@@ -147,6 +148,9 @@ export const getProducts = createServerFn({ method: "GET" }).handler(
           const imageUrl = p.image_path
             ? `${process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL}/storage/v1/object/public/products/${p.image_path}`
             : null;
+          const imageHoverUrl = p.image_path_hover
+            ? `${process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL}/storage/v1/object/public/products/${p.image_path_hover}`
+            : null;
             
           return {
             id: p.id,
@@ -156,6 +160,7 @@ export const getProducts = createServerFn({ method: "GET" }).handler(
             short_description: p.short_description,
             image: imageUrl,
             image_thumbnail: imageUrl,
+            image_hover: imageHoverUrl,
             price: p.price_grosze,
             price_amount: p.price_grosze,
             price_formatted: new Intl.NumberFormat("pl-PL", { style: "currency", currency: p.currency }).format(p.price_grosze / 100),

@@ -344,30 +344,84 @@ export function Storefront({
             return (
               <article className="product" key={product.id}>
                 <div className={`productVisual tone${index % 3}`}>
+                  {product.image_hover && (
+                    <div className="productHoverBadge">2w1</div>
+                  )}
                   {exampleImages[product.seller_id] || product.image_thumbnail || product.image ? (
-                    <img
-                      className={
-                        product.image_thumbnail?.includes("demo-crochet")
-                          ? `demoCrop demoCrop${index}`
-                          : undefined
-                      }
-                      src={
-                        exampleImages[product.seller_id] ??
-                        product.image_thumbnail ??
-                        product.image ??
-                        ""
-                      }
-                      alt={friendlyName(product.name)}
-                      width={400}
-                      height={400}
-                      loading="lazy"
-                      decoding="async"
-                    />
+                    <div className="productImageWrapper">
+                      <img
+                        className={
+                          product.image_thumbnail?.includes("demo-crochet")
+                            ? `demoCrop demoCrop${index} baseImage`
+                            : "baseImage"
+                        }
+                        src={
+                          exampleImages[product.seller_id] ??
+                          product.image_thumbnail ??
+                          product.image ??
+                          ""
+                        }
+                        alt={friendlyName(product.name)}
+                        width={400}
+                        height={400}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      {product.image_hover && (
+                        <img
+                          className="hoverImage"
+                          src={product.image_hover}
+                          alt={`${friendlyName(product.name)} - detal`}
+                          width={400}
+                          height={400}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      )}
+                    </div>
                   ) : (
                     <span className="miniPouf" aria-hidden="true" />
                   )}
                   <span className="productNumber">{String(index + 1).padStart(2, "0")}</span>
                 </div>
+                <style>{`
+                  .productImageWrapper {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                  }
+                  .productImageWrapper img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transition: opacity 0.3s ease;
+                  }
+                  .hoverImage {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    opacity: 0;
+                  }
+                  .productVisual:hover .hoverImage {
+                    opacity: 1;
+                  }
+                  .productVisual:hover .baseImage {
+                    opacity: 0;
+                  }
+                  .productHoverBadge {
+                    position: absolute;
+                    top: 12px;
+                    right: 12px;
+                    background: #fff;
+                    color: #000;
+                    font-size: 11px;
+                    font-weight: 700;
+                    padding: 4px 8px;
+                    border-radius: 99px;
+                    z-index: 10;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                  }
+                `}</style>
                 <div className="productInfo">
                   <div>
                     <h3>{friendlyName(product.name)}</h3>

@@ -46,6 +46,7 @@ const productSchema = z.object({
   price_grosze: z.number().int().positive(),
   currency: z.string().default("PLN"),
   image_path: z.string().nullable().optional(),
+  image_path_hover: z.string().nullable().optional(),
   image_alt: z.string().nullable().optional(),
   quantity_limit: z.number().int().nullable().optional(),
   is_active: z.boolean().default(true),

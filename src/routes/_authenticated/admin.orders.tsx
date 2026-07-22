@@ -5,7 +5,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 import {
   listAllOrders,
+  listAllOrders,
   markOrderShipped,
+  cancelOrder,
+  updateOrderNotes,
   checkIsAdmin,
 } from "@/lib/admin-orders.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,6 +59,10 @@ function AdminOrdersPage() {
   const fetchList = useServerFn(listAllOrders);
   const fetchIsAdmin = useServerFn(checkIsAdmin);
   const shipFn = useServerFn(markOrderShipped);
+  const cancelFn = useServerFn(cancelOrder);
+  const notesFn = useServerFn(updateOrderNotes);
+
+  const [notesState, setNotesState] = useState<Record<string, string>>({});
 
   const adminQ = useQuery({
     queryKey: ["is-admin"],
@@ -76,6 +83,30 @@ function AdminOrdersPage() {
     },
     onError: (e: any) => toast.error(e?.message ?? "Nie udało się zaktualizować"),
   });
+
+  const cancelMut = useMutation({
+    mutationFn: (orderId: string) => cancelFn({ data: { orderId } }),
+    onSuccess: () => {
+      toast.success("Anulowano zamówienie i zwrócono zapasy");
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Błąd anulowania"),
+  });
+
+  const notesMut = useMutation({
+    mutationFn: ({ orderId, notes }: { orderId: string, notes: string }) => notesFn({ data: { orderId, notes } }),
+    onSuccess: () => {
+      toast.success("Zapisano notatkę");
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Błąd zapisywania notatki"),
+  });
+
+  async function copyAddress(o: any) {
+    const text = `${o.customer_name}\n${o.shipping_street}\n${o.shipping_postal_code} ${o.shipping_city}\nTel: ${o.customer_phone}\nEmail: ${o.customer_email}\nMetoda: ${o.shipping_method_label}${o.shipping_point_id ? ` (${o.shipping_point_id})` : ""}`;
+    await navigator.clipboard.writeText(text);
+    toast.success("Skopiowano adres do schowka");
+  }
 
   async function handleSignOut() {
     await qc.cancelQueries();
@@ -114,6 +145,8 @@ function AdminOrdersPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
           <h1 style={{ margin: 0 }}>Panel zamówień</h1>
           <div style={{ display: "flex", gap: 8 }}>
+            <Link to="/admin" style={btnGhost as any}>Dashboard</Link>
+            <Link to="/admin/orders" style={btnGhost as any}>Zamówienia</Link>
             <Link to="/admin/products" style={btnGhost as any}>Produkty</Link>
             <Link to="/admin/users" style={btnGhost as any}>Administratorzy</Link>
             <Link to="/" style={btnGhost as any}>← Wróć do sklepu</Link>
@@ -181,8 +214,27 @@ function AdminOrdersPage() {
                     <div>{o.shipping_street}</div>
                     <div>{o.shipping_postal_code} {o.shipping_city}</div>
                     <div style={{ marginTop: 4, fontSize: 13, color: "#666" }}>
-                      {o.shipping_method_label} ({formatPln(o.shipping_cost_grosze, o.currency)})
+                      {o.shipping_method_label} {o.shipping_point_id && <strong>({o.shipping_point_id})</strong>} ({formatPln(o.shipping_cost_grosze, o.currency)})
                     </div>
+                    <button type="button" onClick={() => copyAddress(o)} style={{...btnGhost, fontSize: 11, padding: "4px 8px", marginTop: 8}}>📋 Kopiuj adres</button>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 12 }}>
+                  <h3 style={sectionH}>Notatki administratora</h3>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input 
+                      style={{ flex: 1, padding: "6px 10px", border: "1px solid #ccc", borderRadius: 4 }} 
+                      placeholder="Wpisz notatkę..." 
+                      value={notesState[o.id] !== undefined ? notesState[o.id] : (o.admin_notes || "")}
+                      onChange={e => setNotesState(prev => ({...prev, [o.id]: e.target.value}))}
+                    />
+                    <button 
+                      type="button" 
+                      style={{...btnGhost, padding: "6px 12px"}}
+                      disabled={notesMut.isPending}
+                      onClick={() => notesMut.mutate({ orderId: o.id, notes: notesState[o.id] ?? o.admin_notes ?? "" })}
+                    >Zapisz</button>
                   </div>
                 </div>
 
@@ -202,16 +254,26 @@ function AdminOrdersPage() {
                   </ul>
                 </div>
 
-                {o.status === "paid" && (
-                  <div style={{ marginTop: 14, display: "flex", justifyContent: "flex-end" }}>
+                {(o.status === "paid" || o.status === "pending") && (
+                  <div style={{ marginTop: 14, display: "flex", justifyContent: "flex-end", gap: 8 }}>
                     <button
                       type="button"
-                      disabled={shipMut.isPending}
-                      onClick={() => shipMut.mutate(o.id)}
-                      style={btnPrimary}
+                      disabled={cancelMut.isPending}
+                      onClick={() => { if(confirm("Na pewno anulować to zamówienie?")) cancelMut.mutate(o.id); }}
+                      style={{...btnGhost, color: "red", borderColor: "red"}}
                     >
-                      {shipMut.isPending ? "Zapisywanie…" : "✓ Oznacz jako wysłane"}
+                      {cancelMut.isPending ? "..." : "Anuluj zamówienie"}
                     </button>
+                    {o.status === "paid" && (
+                      <button
+                        type="button"
+                        disabled={shipMut.isPending}
+                        onClick={() => shipMut.mutate(o.id)}
+                        style={btnPrimary}
+                      >
+                        {shipMut.isPending ? "Zapisywanie…" : "✓ Oznacz jako wysłane"}
+                      </button>
+                    )}
                   </div>
                 )}
                 {o.paid_at && (

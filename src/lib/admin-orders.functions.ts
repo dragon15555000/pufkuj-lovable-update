@@ -70,6 +70,77 @@ export const markOrderShipped = createServerFn({ method: "POST" })
     return { order: { id: updated.id, status: updated.status } };
   });
 
+export const cancelOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { orderId: string }) => {
+    if (!input?.orderId || typeof input.orderId !== "string") {
+      throw new Error("orderId is required");
+    }
+    return input;
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Fetch order to get items
+    const { data: order, error: fetchErr } = await context.supabase
+      .from("orders")
+      .select("status, items")
+      .eq("id", data.orderId)
+      .single();
+
+    if (fetchErr || !order) throw new Error("Order not found");
+    if (order.status === "cancelled") throw new Error("Already cancelled");
+
+    // Restore stock if it was paid
+    if (order.status === "paid" || order.status === "shipped") {
+      const itemsToUpdate = Array.isArray(order.items) ? (order.items as Array<any>) : [];
+      for (const item of itemsToUpdate) {
+        if (!item.seller_id) continue;
+        const { data: prod } = await supabaseAdmin
+          .from("products")
+          .select("quantity_limit")
+          .eq("slug", item.seller_id)
+          .single();
+          
+        if (prod && typeof prod.quantity_limit === "number") {
+          const newLimit = prod.quantity_limit + (item.quantity || 1);
+          await supabaseAdmin.from("products").update({ quantity_limit: newLimit, is_active: true }).eq("slug", item.seller_id);
+        }
+      }
+    }
+
+    const { data: updated, error } = await context.supabase
+      .from("orders")
+      .update({ status: "cancelled", updated_at: new Date().toISOString() })
+      .eq("id", data.orderId)
+      .select("*")
+      .single();
+
+    if (error) throw new Error(error.message);
+    return { order: { id: updated.id, status: updated.status } };
+  });
+
+export const updateOrderNotes = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { orderId: string; notes: string }) => {
+    if (!input?.orderId || typeof input.orderId !== "string") {
+      throw new Error("orderId is required");
+    }
+    return input;
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+
+    const { error } = await context.supabase
+      .from("orders")
+      .update({ admin_notes: data.notes, updated_at: new Date().toISOString() })
+      .eq("id", data.orderId);
+
+    if (error) throw new Error(error.message);
+    return { success: true };
+  });
+
 export const checkIsAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
