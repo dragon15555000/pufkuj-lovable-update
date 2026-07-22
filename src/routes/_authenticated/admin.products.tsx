@@ -149,8 +149,8 @@ function AdminProductsPage() {
                 <input style={inputStyle} value={editingProduct.short_description || ""} onChange={e => setEditingProduct({...editingProduct, short_description: e.target.value})} />
               </div>
               <div>
-                <label style={labelStyle}>Cena w groszach</label>
-                <input required type="number" min="1" style={inputStyle} value={editingProduct.price_grosze || ""} onChange={e => setEditingProduct({...editingProduct, price_grosze: parseInt(e.target.value)})} />
+                <label style={labelStyle}>Cena (PLN)</label>
+                <input required type="number" step="0.01" min="0.01" style={inputStyle} value={editingProduct.price_grosze ? (editingProduct.price_grosze / 100).toString() : ""} onChange={e => { const val = parseFloat(e.target.value); if (!isNaN(val)) setEditingProduct({...editingProduct, price_grosze: Math.round(val * 100)}) }} />
               </div>
               <div>
                 <label style={labelStyle}>Limit sztuk</label>
