@@ -37,6 +37,8 @@ export type Database = {
           total_grosze: number
           updated_at: string
           user_id: string | null
+          admin_notes: string | null
+          shipping_point_id: string | null
         }
         Insert: {
           created_at?: string
@@ -60,6 +62,8 @@ export type Database = {
           total_grosze: number
           updated_at?: string
           user_id?: string | null
+          admin_notes?: string | null
+          shipping_point_id?: string | null
         }
         Update: {
           created_at?: string
@@ -83,7 +87,34 @@ export type Database = {
           total_grosze?: number
           updated_at?: string
           user_id?: string | null
+          admin_notes?: string | null
+          shipping_point_id?: string | null
         }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          id: string
+          slug: string
+          name: string
+          short_description: string | null
+          description_md: string | null
+          price_amount: number | null
+          price_grosze: number | null
+          currency: string | null
+          image_path: string | null
+          image_path_hover: string | null
+          image_alt: string | null
+          quantity_limit: number | null
+          is_active: boolean
+          sort_order: number
+          yarn_type: string | null
+          size: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: any
+        Update: any
         Relationships: []
       }
       user_roles: {
