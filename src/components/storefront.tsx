@@ -320,9 +320,13 @@ export function Storefront({
         </div>
         <div className="productGrid">
           {products.map((product, index) => {
+            const hasDiscount = (product.discount_grosze ?? 0) > 0 && !!product.original_price_formatted;
             return (
               <article className="product" key={product.id}>
                 <div className={`productVisual tone${index % 3}`}>
+                  {hasDiscount && (
+                    <div className="productPromoBadge">Promocja</div>
+                  )}
                   {product.image_hover && (
                     <div className="productHoverBadge">2w1</div>
                   )}
@@ -384,7 +388,7 @@ export function Storefront({
                   .productVisual:hover .hoverImage {
                     opacity: 1;
                   }
-                  .productVisual:hover .baseImage {
+                  .productVisual:hover .productImageWrapper:has(.hoverImage) .baseImage {
                     opacity: 0;
                   }
                   .productHoverBadge {
@@ -400,6 +404,37 @@ export function Storefront({
                     z-index: 10;
                     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                   }
+                  .productPromoBadge {
+                    position: absolute;
+                    top: 12px;
+                    left: 12px;
+                    background: linear-gradient(135deg, #ef4444, #f97316);
+                    color: #fff;
+                    font-size: 12px;
+                    font-weight: 800;
+                    letter-spacing: 0.5px;
+                    text-transform: uppercase;
+                    padding: 6px 12px;
+                    border-radius: 99px;
+                    z-index: 10;
+                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+                    transform: rotate(-4deg);
+                  }
+                  .priceStack {
+                    display: flex;
+                    align-items: baseline;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                  }
+                  .priceOriginal {
+                    color: #9ca3af;
+                    text-decoration: line-through;
+                    font-size: 15px;
+                    font-weight: 500;
+                  }
+                  .priceNow {
+                    color: #dc2626;
+                  }
                 `}</style>
                 <div className="productInfo">
                   <div>
@@ -414,7 +449,14 @@ export function Storefront({
                     </ul>
                   </div>
                   <div className="buyRow">
-                    <strong>{product.price_formatted}</strong>
+                    {hasDiscount ? (
+                      <span className="priceStack">
+                        <span className="priceOriginal">{product.original_price_formatted}</span>
+                        <strong className="priceNow">{product.price_formatted}</strong>
+                      </span>
+                    ) : (
+                      <strong>{product.price_formatted}</strong>
+                    )}
                     {product.quantity_limit === 1 && (
                       <span style={{ color: "#ef4444", fontSize: 13, fontWeight: "bold" }}>Ostatnia sztuka!</span>
                     )}
@@ -447,9 +489,11 @@ export function Storefront({
 
       <section className="howToOrder" aria-labelledby="how-order-title">
         <div className="shell">
-          <p className="eyebrow">Zamówienie indywidualne</p>
-          <h2 id="how-order-title">Jak zamówić własny wzór?</h2>
-          <ol>
+          <div className="howToOrderHead">
+            <p className="eyebrow">Zamówienie indywidualne</p>
+            <h2 id="how-order-title">Jak zamówić własny wzór?</h2>
+          </div>
+          <ol className="howSteps">
             <li>
               <span>1</span>
               <div>
@@ -524,10 +568,6 @@ export function Storefront({
           <p>
             Sklep internetowy Pufkuj · Bartosz Gallos · ul. Borowskiego 7b/7, 66-400 Gorzów
             Wielkopolski · <a href="mailto:kontakt@pufkuj.pl">kontakt@pufkuj.pl</a>
-          </p>
-          <p style={{ marginTop: 8, fontSize: "0.85rem", color: "#888" }}>
-            Pufkuj to działalność nierejestrowana — prowadzona w pełni legalnie na podstawie art. 5 Prawa przedsiębiorców. 
-            Każda maskotka to autorskie rękodzieło tworzone z pasją w Polsce. Dowód zakupu otrzymasz na podany e-mail.
           </p>
         </div>
         <div className="shell legal">

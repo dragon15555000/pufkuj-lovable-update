@@ -44,6 +44,8 @@ export type Product = {
   image_hover?: string | null;
   yarn_type?: string | null;
   size?: string | null;
+  discount_grosze?: number | null;
+  original_price_formatted?: string | null;
 };
 
 const FALLBACK_LABEL = "Cena na zapytanie";
@@ -171,6 +173,10 @@ export const getProducts = createServerFn({ method: "GET" }).handler(
             quantity_limit: p.quantity_limit,
             yarn_type: p.yarn_type,
             size: p.size,
+            discount_grosze: p.discount_grosze,
+            original_price_formatted: (p.discount_grosze && p.discount_grosze > 0)
+              ? new Intl.NumberFormat("pl-PL", { style: "currency", currency: p.currency ?? "PLN" }).format(((p.price_grosze ?? 0) + p.discount_grosze) / 100)
+              : null,
           };
         });
         return { products: supabaseProducts, demo: false };
