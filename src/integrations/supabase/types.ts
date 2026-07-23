@@ -39,6 +39,8 @@ export type Database = {
           user_id: string | null
           admin_notes: string | null
           shipping_point_id: string | null
+          tracking_carrier: string | null
+          tracking_number: string | null
         }
         Insert: {
           created_at?: string
@@ -64,6 +66,8 @@ export type Database = {
           user_id?: string | null
           admin_notes?: string | null
           shipping_point_id?: string | null
+          tracking_carrier?: string | null
+          tracking_number?: string | null
         }
         Update: {
           created_at?: string
@@ -89,6 +93,8 @@ export type Database = {
           user_id?: string | null
           admin_notes?: string | null
           shipping_point_id?: string | null
+          tracking_carrier?: string | null
+          tracking_number?: string | null
         }
         Relationships: []
       }
@@ -102,6 +108,7 @@ export type Database = {
           price_amount: number | null
           price_grosze: number | null
           currency: string | null
+          discount_grosze: number
           image_path: string | null
           image_path_hover: string | null
           image_alt: string | null
