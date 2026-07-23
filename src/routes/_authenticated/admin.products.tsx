@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { checkIsAdmin, createManualOrder } from "@/lib/admin-orders.functions";
-import { listAllProducts, saveProduct, deleteProduct } from "@/lib/admin-products.functions";
+import { listAllProducts, saveProduct, deleteProduct, importFrom1Koszyk } from "@/lib/admin-products.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
@@ -25,6 +25,7 @@ function AdminProductsPage() {
   const saveProductFn = useServerFn(saveProduct);
   const deleteProductFn = useServerFn(deleteProduct);
   const createManualOrderFn = useServerFn(createManualOrder);
+  const importFn = useServerFn(importFrom1Koszyk);
 
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -39,6 +40,15 @@ function AdminProductsPage() {
     queryKey: ["admin-products"],
     queryFn: () => fetchProducts(),
     enabled: adminQ.data?.isAdmin === true,
+  });
+
+  const importMut = useMutation({
+    mutationFn: () => importFn(),
+    onSuccess: (res) => {
+      toast.success(`Zaimportowano ${res.count} produktów z 1koszyk!`);
+      qc.invalidateQueries({ queryKey: ["admin-products"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Błąd importu"),
   });
 
   const saveMut = useMutation({
@@ -134,6 +144,14 @@ function AdminProductsPage() {
           <div style={{ display: "flex", gap: 8 }}>
             <Link to="/admin" style={btnGhost as any}>Dashboard</Link>
             <Link to="/admin/orders" style={btnGhost as any}>Zamówienia</Link>
+            <button 
+              type="button" 
+              onClick={() => { if(confirm("Czy chcesz zaimportować produkty z 1koszyk?")) importMut.mutate(); }} 
+              style={{...btnGhost, color: "blue", borderColor: "blue"} as any}
+              disabled={importMut.isPending}
+            >
+              {importMut.isPending ? "Importowanie..." : "⬇️ Importuj z 1koszyk"}
+            </button>
             <button type="button" onClick={() => { setEditingProduct({ is_active: true, sort_order: 0 }); setIsFormOpen(true); }} style={btnPrimary}>+ Dodaj produkt</button>
           </div>
         </div>

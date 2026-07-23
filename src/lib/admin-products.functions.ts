@@ -104,3 +104,53 @@ export const deleteProduct = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { success: true };
   });
+
+export const importFrom1Koszyk = createServerFn({ method: "POST" })
+  .handler(async () => {
+    await requireAdmin();
+    const apiKey = process.env.ONECART_API_KEY;
+    const clientId = process.env.ONECART_CLIENT_ID;
+    const apiUrl = process.env.ONECART_API_URL ?? "https://api.1cart.eu/v1";
+
+    if (!apiKey || !clientId) throw new Error("Brak kluczy 1koszyk w .env");
+
+    const response = await fetch(`${apiUrl}/products/all?disabled=0`, {
+      headers: { "X-API-key": apiKey, "X-client-id": clientId },
+    });
+    
+    if (!response.ok) throw new Error(`1koszyk API error: ${response.status}`);
+    
+    const json = await response.json();
+    const rawProducts = json?.data?.products || [];
+    
+    if (rawProducts.length === 0) return { success: true, count: 0 };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let imported = 0;
+    for (const rp of rawProducts) {
+      let finalSlug = rp.name?.toLowerCase().replace(/[^a-z0-9\u0100-\u024F]+/g, '-').replace(/^-|-$/g, '');
+      if (!finalSlug) continue;
+
+      let price = 0;
+      if (rp.price) {
+        if (typeof rp.price === "number") price = Math.round(rp.price * 100);
+        else if (typeof rp.price === "string") price = Math.round(parseFloat(rp.price.replace(",", ".")) * 100);
+        else if (rp.price.amount) price = Math.round(parseFloat(String(rp.price.amount).replace(",", ".")) * 100);
+      }
+      if (!price) price = 1000;
+
+      const { error } = await supabaseAdmin.from("products").insert({
+        slug: finalSlug + "-" + Math.floor(Math.random()*1000), // zapobiega konfliktom
+        name: rp.name || "Nieznany",
+        short_description: rp.short_description || null,
+        price_grosze: price,
+        is_active: true,
+        sort_order: imported,
+      });
+
+      if (!error) imported++;
+    }
+
+    return { success: true, count: imported };
+  });
