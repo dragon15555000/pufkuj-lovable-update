@@ -139,33 +139,47 @@ function AdminProductsPage() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div>
                 <label style={labelStyle}>Nazwa</label>
-                <input required style={inputStyle} value={editingProduct.name || ""} onChange={e => setEditingProduct({...editingProduct, name: e.target.value, slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-')})} />
-              </div>
-              <div>
-                <label style={labelStyle}>Slug</label>
-                <input required style={inputStyle} value={editingProduct.slug || ""} onChange={e => setEditingProduct({...editingProduct, slug: e.target.value})} />
+                <input required style={inputStyle} value={editingProduct.name || ""} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} />
               </div>
               <div>
                 <label style={labelStyle}>Krótki opis</label>
                 <input style={inputStyle} value={editingProduct.short_description || ""} onChange={e => setEditingProduct({...editingProduct, short_description: e.target.value})} />
               </div>
               <div>
+                <label style={labelStyle}>Rodzaj włóczki</label>
+                <input style={inputStyle} placeholder="np. Włóczka chenille" value={editingProduct.yarn_type || ""} onChange={e => setEditingProduct({...editingProduct, yarn_type: e.target.value})} />
+              </div>
+              <div>
+                <label style={labelStyle}>Rozmiar</label>
+                <input style={inputStyle} placeholder="np. ok. 19 cm" value={editingProduct.size || ""} onChange={e => setEditingProduct({...editingProduct, size: e.target.value})} />
+              </div>
+              <div>
                 <label style={labelStyle}>Cena (PLN)</label>
                 <input required type="number" step="0.01" min="0.01" style={inputStyle} value={editingProduct.price_grosze ? (editingProduct.price_grosze / 100).toString() : ""} onChange={e => { const val = parseFloat(e.target.value); if (!isNaN(val)) setEditingProduct({...editingProduct, price_grosze: Math.round(val * 100)}) }} />
               </div>
               <div>
-                <label style={labelStyle}>Limit sztuk</label>
-                <input type="number" min="0" style={inputStyle} value={editingProduct.quantity_limit || ""} onChange={e => setEditingProduct({...editingProduct, quantity_limit: e.target.value ? parseInt(e.target.value) : null})} />
+                <label style={labelStyle}>Ilość dostępna (Sztuki)</label>
+                <input type="number" min="0" style={inputStyle} value={editingProduct.quantity_limit ?? ""} onChange={e => setEditingProduct({...editingProduct, quantity_limit: e.target.value ? parseInt(e.target.value) : null})} />
               </div>
               <div>
                 <label style={labelStyle}>Zdjęcie główne</label>
                 <input type="file" accept="image/*" style={inputStyle} onChange={(e) => handleImageUpload(e, "image_path")} disabled={uploading} />
-                {editingProduct.image_path && <p style={{ fontSize: 12, marginTop: 4 }}>Obecne: {editingProduct.image_path}</p>}
+                {editingProduct.image_path && (
+                  <div style={{ marginTop: 8 }}>
+                    <p style={{ fontSize: 12, margin: "0 0 4px 0" }}>Podgląd po skadrowaniu (1:1):</p>
+                    <img src={`${process.env.VITE_SUPABASE_URL ?? ""}/storage/v1/object/public/products/${editingProduct.image_path}`} alt="Podgląd" style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "1px solid #ddd" }} />
+                  </div>
+                )}
               </div>
               <div>
                 <label style={labelStyle}>Zdjęcie (Hover/2w1)</label>
                 <input type="file" accept="image/*" style={inputStyle} onChange={(e) => handleImageUpload(e, "image_path_hover")} disabled={uploading} />
-                {editingProduct.image_path_hover && <p style={{ fontSize: 12, marginTop: 4 }}>Obecne: {editingProduct.image_path_hover}</p>}
+                {editingProduct.image_path_hover && (
+                  <div style={{ marginTop: 8 }}>
+                    <p style={{ fontSize: 12, margin: "0 0 4px 0" }}>Podgląd hover (1:1):</p>
+                    <img src={`${process.env.VITE_SUPABASE_URL ?? ""}/storage/v1/object/public/products/${editingProduct.image_path_hover}`} alt="Podgląd Hover" style={{ width: 100, height: 100, objectFit: "cover", borderRadius: 8, border: "1px solid #ddd" }} />
+                  </div>
+                )}
               </div>
               <div style={{ gridColumn: "1 / -1" }}>
                 <label style={labelStyle}>Opis szczegółowy (Markdown)</label>

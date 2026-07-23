@@ -12,26 +12,6 @@ const exampleImages: Record<string, string> = {
   "axolotl-rozowy": "/products/examples/axolotl.png",
 };
 
-const productDetails: Record<string, { description: string; size: string; status: string }> = {
-  "axolotl-rozowy": {
-    description: "Pastelowy axolotl z miękkiej włóczki chenille, wykonany ręcznie oczko po oczku.",
-    size: "ok. 25 cm",
-    status: "Na zamówienie",
-  },
-  "zolwik-mietowy": {
-    description:
-      "Miętowy żółwik z włóczki chenille — miękki towarzysz do przytulania i dekoracji pokoju.",
-    size: "ok. 20 cm",
-    status: "Na zamówienie",
-  },
-  "osmiorniczka-koralowa": {
-    description:
-      "Koralowa ośmiorniczka-brelok szydełkowana ręcznie z miękkiej włóczki chenille.",
-    size: "ok. 10 cm",
-    status: "Gotowa do wysyłki",
-  },
-};
-
 type TiktokStory = { href: string; title: string; alt: string; image: string };
 
 const defaultTiktokStories: TiktokStory[] = [
@@ -340,7 +320,6 @@ export function Storefront({
         </div>
         <div className="productGrid">
           {products.map((product, index) => {
-            const details = productDetails[product.seller_id];
             return (
               <article className="product" key={product.id}>
                 <div className={`productVisual tone${index % 3}`}>
@@ -425,13 +404,12 @@ export function Storefront({
                 <div className="productInfo">
                   <div>
                     <h3>{friendlyName(product.name)}</h3>
-                    <p>{details?.description ?? cleanText(product.short_description)}</p>
+                    <p>{cleanText(product.short_description)}</p>
                     <ul className="productMeta">
-                      <li>Włóczka chenille</li>
-                      {details?.size && <li>{details.size}</li>}
+                      <li>{product.yarn_type || "Włóczka chenille"}</li>
+                      {product.size && <li>{product.size}</li>}
                       <li className="availability">
-                        {details?.status ??
-                          (product.quantity_limit ? "Gotowy do wysyłki" : "Na zamówienie")}
+                        {product.quantity_limit ? "Gotowy do wysyłki" : "Na zamówienie"}
                       </li>
                     </ul>
                   </div>

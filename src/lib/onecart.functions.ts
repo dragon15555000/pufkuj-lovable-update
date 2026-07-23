@@ -42,6 +42,8 @@ export type Product = {
   price_currency: string;
   quantity_limit?: number | null;
   image_hover?: string | null;
+  yarn_type?: string | null;
+  size?: string | null;
 };
 
 const FALLBACK_LABEL = "Cena na zapytanie";
@@ -166,6 +168,8 @@ export const getProducts = createServerFn({ method: "GET" }).handler(
             price_formatted: new Intl.NumberFormat("pl-PL", { style: "currency", currency: p.currency }).format(p.price_grosze / 100),
             price_currency: p.currency,
             quantity_limit: p.quantity_limit,
+            yarn_type: p.yarn_type,
+            size: p.size,
           };
         });
         return { products: supabaseProducts, demo: false };

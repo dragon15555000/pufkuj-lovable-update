@@ -38,9 +38,9 @@ export const listAllProducts = createServerFn({ method: "GET" }).handler(async (
 });
 
 const productSchema = z.object({
-  id: z.string().optional(),
-  slug: z.string().min(1),
-  name: z.string().min(1),
+  id: z.string().uuid().optional(),
+  slug: z.string().min(2).max(100).optional(),
+  name: z.string().min(2).max(200),
   short_description: z.string().nullable().optional(),
   description_md: z.string().nullable().optional(),
   price_grosze: z.number().int().positive(),
@@ -51,6 +51,8 @@ const productSchema = z.object({
   quantity_limit: z.number().int().nullable().optional(),
   is_active: z.boolean().default(true),
   sort_order: z.number().int().default(0),
+  yarn_type: z.string().nullable().optional(),
+  size: z.string().nullable().optional(),
 });
 
 export const saveProduct = createServerFn({ method: "POST" })
@@ -59,16 +61,29 @@ export const saveProduct = createServerFn({ method: "POST" })
     await requireAdmin();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    // Auto-generate slug if missing
+    let finalSlug = data.slug;
+    if (!finalSlug && data.name) {
+      finalSlug = data.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+    }
+
     if (data.id) {
+      const { id, ...updates } = data;
+      if (finalSlug) updates.slug = finalSlug;
       const { error } = await supabaseAdmin
         .from("products")
-        .update(data)
-        .eq("id", data.id);
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq("id", id);
       if (error) throw new Error(error.message);
     } else {
+      if (!finalSlug) throw new Error("Slug is required and could not be generated");
+      const { id, ...inserts } = data;
       const { error } = await supabaseAdmin
         .from("products")
-        .insert(data);
+        .insert({ ...inserts, slug: finalSlug });
       if (error) throw new Error(error.message);
     }
     return { success: true };
