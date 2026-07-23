@@ -525,6 +525,10 @@ export function Storefront({
             Sklep internetowy Pufkuj · Bartosz Gallos · ul. Borowskiego 7b/7, 66-400 Gorzów
             Wielkopolski · <a href="mailto:kontakt@pufkuj.pl">kontakt@pufkuj.pl</a>
           </p>
+          <p style={{ marginTop: 8, fontSize: "0.85rem", color: "#888" }}>
+            Pufkuj to działalność nierejestrowana — prowadzona w pełni legalnie na podstawie art. 5 Prawa przedsiębiorców. 
+            Każda maskotka to autorskie rękodzieło tworzone z pasją w Polsce. Dowód zakupu otrzymasz na podany e-mail.
+          </p>
         </div>
         <div className="shell legal">
           <span>© {new Date().getFullYear()} Bartosz Gallos · Wszelkie prawa zastrzeżone</span>

@@ -26,10 +26,19 @@ function RegulaminPage() {
     <LegalShell title="Regulamin Sklepu Internetowego Pufkuj">
       <section>
         <h2>1. Postanowienia ogólne</h2>
+        <p>Sklep internetowy pod adresem pufkuj.pl prowadzony jest przez:</p>
         <p>
-          Sklep internetowy Pufkuj, dostępny pod adresem pufkuj.pl, prowadzony jest przez
-          Bartosza Gallosa, wykonującego działalność nierejestrowaną, zamieszkałego pod adresem:
-          ul. Borowskiego 7b/7, 66-400 Gorzów Wielkopolski, adres e-mail: kontakt@pufkuj.pl.
+          Bartosz Gallos
+          <br />
+          ul. Borowskiego 7b/7
+          <br />
+          66-400 Gorzów Wielkopolski
+          <br />
+          E-mail: kontakt@pufkuj.pl
+        </p>
+        <p>
+          Sklep działa w ramach tzw. działalności nierejestrowanej na podstawie art. 5 ustawy z dnia 6 marca 2018 r. - Prawo przedsiębiorców.
+          Działalność jest w pełni legalna, a każdy kupujący ma pełne prawa konsumenckie. Po dokonaniu zakupu otrzymasz e-mail, który stanowi dowód zakupu (rachunek).
         </p>
         <p>
           Regulamin określa zasady składania zamówień, realizacji dostaw, płatności oraz

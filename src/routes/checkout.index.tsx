@@ -246,7 +246,7 @@ function CheckoutPage() {
                 aria-invalid={errors.customerPhone ? true : undefined}
                 required
                 maxLength={30}
-                placeholder="+48 500 600 700"
+                placeholder="np. 500 600 700"
               />
               {errors.customerPhone && (
                 <p className="customForm__error">{errors.customerPhone}</p>
@@ -372,6 +372,10 @@ function CheckoutPage() {
               {submitting ? "Przekierowuję…" : "Zapłać w Stripe"}{" "}
               <span aria-hidden="true">↗</span>
             </button>
+          </div>
+          <div style={{ marginTop: "1rem", fontSize: "0.85rem", color: "#666", textAlign: "center", lineHeight: "1.4" }}>
+            Pufkuj to działalność nierejestrowana — w pełni legalne, autorskie rękodzieło. <br/>
+            Po zakupie otrzymasz na e-mail potwierdzenie, które pełni rolę dowodu zakupu (rachunku).
           </div>
         </section>
       </form>
