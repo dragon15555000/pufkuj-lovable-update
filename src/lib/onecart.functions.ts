@@ -147,11 +147,12 @@ export const getProducts = createServerFn({ method: "GET" }).handler(
         console.error("Błąd pobierania produktów z Supabase:", error);
       } else if (data && data.length > 0) {
         const supabaseProducts: Product[] = data.map((p) => {
+          const cacheBuster = p.updated_at ? `?v=${new Date(p.updated_at).getTime()}` : '';
           const imageUrl = p.image_path
-            ? `${process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL}/storage/v1/object/public/products/${p.image_path}`
+            ? `${process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL}/storage/v1/object/public/products/${p.image_path}${cacheBuster}`
             : null;
           const imageHoverUrl = p.image_path_hover
-            ? `${process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL}/storage/v1/object/public/products/${p.image_path_hover}`
+            ? `${process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL}/storage/v1/object/public/products/${p.image_path_hover}${cacheBuster}`
             : null;
             
           return {
