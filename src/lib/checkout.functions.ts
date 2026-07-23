@@ -64,7 +64,22 @@ export const startCheckout = createServerFn({ method: "POST" })
 
     const userId = await tryGetUserId();
 
-    const itemsTotal = data.items.reduce(
+    const slugs = data.items.map((it) => it.seller_id);
+    const { data: dbProducts, error: dbError } = await supabaseAdmin
+      .from("products")
+      .select("slug, price_grosze")
+      .in("slug", slugs)
+      .eq("is_active", true);
+
+    if (dbError) throw new Error("Błąd weryfikacji produktów z bazy danych");
+
+    const verifiedItems = data.items.map((it) => {
+      const dbProd = dbProducts?.find((p) => p.slug === it.seller_id);
+      if (!dbProd) throw new Error(`Produkt ${it.name} jest niedostępny lub wyprzedany`);
+      return { ...it, price_grosze: dbProd.price_grosze };
+    });
+
+    const itemsTotal = verifiedItems.reduce(
       (sum, it) => sum + it.price_grosze * it.quantity,
       0,
     );
@@ -90,7 +105,7 @@ export const startCheckout = createServerFn({ method: "POST" })
         shipping_method_label: shipping_label,
         shipping_point_id: data.shippingPointId,
         shipping_cost_grosze: shipping_amount,
-        items: data.items,
+        items: verifiedItems,
         items_total_grosze: itemsTotal,
         total_grosze: total,
         currency: "PLN",
@@ -108,7 +123,7 @@ export const startCheckout = createServerFn({ method: "POST" })
       "https://pufki-shop-magic.lovable.app";
 
     const session = await createCheckoutSession({
-      items: data.items.map((it) => ({
+      items: verifiedItems.map((it) => ({
         name: it.name,
         amount_grosze: it.price_grosze,
         quantity: it.quantity,
